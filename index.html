@@ -24,6 +24,7 @@
 
   <script>
     const maxChars = 1000;
+    const apiUrl = 'https://your-vercel-app.vercel.app/api/letters'; // Vercel에 배포된 API URL
 
     // 글자 수 업데이트
     document.getElementById("letter-input").addEventListener("input", function() {
@@ -32,7 +33,7 @@
     });
 
     // 편지 보내기 함수
-    function submitLetter() {
+    async function submitLetter() {
       const letterInput = document.getElementById('letter-input');
       const letterText = letterInput.value.trim();
 
@@ -49,28 +50,47 @@
         timestamp: new Date().toLocaleString(),
       };
 
-      // 로컬 저장소에 편지 저장
-      saveLetterToLocalStorage(letter);
+      // 백엔드 서버에 편지 저장
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(letter),
+        });
 
-      // 화면에 추가
-      addLetterToList(letter);
+        if (!response.ok) {
+          throw new Error('서버에 편지 저장 실패');
+        }
 
-      // 입력창 초기화
-      letterInput.value = '';
-      document.getElementById("char-count").textContent = `0 / ${maxChars}자`;
+        const savedLetter = await response.json();
+        addLetterToList(savedLetter);
+
+        // 입력창 초기화
+        letterInput.value = '';
+        document.getElementById("char-count").textContent = `0 / ${maxChars}자`;
+      } catch (error) {
+        console.error(error);
+        alert('편지 전송 중 오류가 발생했습니다.');
+      }
     }
 
-    // 로컬 저장소에 편지 저장
-    function saveLetterToLocalStorage(letter) {
-      const letters = JSON.parse(localStorage.getItem('letters')) || [];
-      letters.push(letter);
-      localStorage.setItem('letters', JSON.stringify(letters));
-    }
+    // 서버에서 편지 목록 불러오기
+    async function loadLetters() {
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error('서버에서 편지 불러오기 실패');
+        }
 
-    // 로컬 저장소에서 편지 가져오기
-    function loadLetters() {
-      const letters = JSON.parse(localStorage.getItem('letters')) || [];
-      letters.forEach(addLetterToList);
+        const letters = await response.json();
+        const letterList = document.getElementById('letter-list');
+        letterList.innerHTML = ''; // 기존 내용 초기화
+
+        letters.forEach(addLetterToList);
+      } catch (error) {
+        console.error(error);
+        alert('편지 불러오는 중 오류가 발생했습니다.');
+      }
     }
 
     // 편지를 리스트에 추가
@@ -85,7 +105,7 @@
       letterList.appendChild(newLetter);
     }
 
-    // 페이지 로드 시 로컬 저장소에서 편지 불러오기
+    // 페이지 로드 시 서버에서 편지 불러오기
     loadLetters();
   </script>
 </body>
