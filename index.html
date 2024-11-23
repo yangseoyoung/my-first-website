@@ -56,7 +56,7 @@
     // 글자 수 업데이트
     document.getElementById("letter-input").addEventListener("input", function () {
       const charCount = this.value.length;
-      document.getElementById("char-count").textContent = ${charCount} / ${maxChars}자;
+      document.getElementById("char-count").textContent = `${charCount} / ${maxChars}자`;
     });
 
     // 편지 보내기 함수
@@ -75,7 +75,7 @@
         alert("내용을 입력하세요.");
         return;
       } else if (letterText.length > maxChars) {
-        alert(편지는 ${maxChars}자 이내로 작성해주세요.);
+        alert(`편지는 ${maxChars}자 이내로 작성해주세요.`);
         return;
       }
 
@@ -103,7 +103,7 @@
         // 입력창 초기화
         letterInput.value = '';
         categorySelect.value = '';
-        document.getElementById("char-count").textContent = 0 / ${maxChars}자;
+        document.getElementById("char-count").textContent = `0 / ${maxChars}자`;
       } catch (error) {
         console.error(error);
         alert('편지 전송 중 오류가 발생했습니다.');
@@ -137,11 +137,11 @@
       const letterList = document.getElementById('letter-list');
       const newLetter = document.createElement('div');
       newLetter.className = 'letter-item';
-      newLetter.innerHTML = 
+      newLetter.innerHTML = `
         <strong>카테고리: ${letter.category}</strong>
         <div>${letter.text}</div>
         <div class="timestamp">${letter.timestamp}</div>
-      ;
+      `;
       letterList.appendChild(newLetter);
     }
 
