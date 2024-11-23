@@ -3,17 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>우리집 댕댕이에게 보내는 편지</title>
+  <title>편지 작성하기</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
     #letter-list { display: flex; overflow: hidden; justify-content: start; align-items: center; height: 200px; }
-    #letter-list div { min-width: 300px; margin: 0 10px; flex-shrink: 0; }
+    #letter-list div { min-width: 300px; margin: 0 10px; flex-shrink: 0; cursor: pointer; }
     button { padding: 10px 20px; font-size: 1em; cursor: pointer; margin: 5px; }
     textarea { width: 80%; height: 100px; font-size: 1em; margin: 10px 0; }
     select { font-size: 1em; padding: 5px; margin: 10px; }
-    .letter-item { border: 1px solid #ddd; background-color: #fff; padding: 20px; margin: 10px auto; max-width: 300px; text-align: left; font-size: 1.2em; }
+    .letter-item { 
+      border: 1px solid #ddd; 
+      background-color: #fff; 
+      padding: 20px; 
+      margin: 10px auto; 
+      max-width: 300px; 
+      text-align: left; 
+      font-size: 1.2em; 
+      border-radius: 10px;
+    }
     .timestamp { font-size: 0.8em; color: #666; margin-top: 5px; }
     .category-label { font-size: 1.1em; margin-bottom: 10px; }
+    #modal { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background-color: rgba(0, 0, 0, 0.7); 
+      display: none; 
+      justify-content: center; 
+      align-items: center; 
+    }
+    #modal-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: left;
+      max-width: 400px;
+      width: 90%;
+      position: relative;
+    }
+    #modal-content .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff5f5f;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
     @keyframes slide {
       0% { transform: translateX(0); }
       100% { transform: translateX(-100%); }
@@ -21,7 +61,7 @@
   </style>
 </head>
 <body>
-  <h1>우리집 댕댕이에게 보내는 편지</h1>
+  <h1>편지 작성하기</h1>
 
   <!-- 카테고리 선택 -->
   <div>
@@ -49,14 +89,22 @@
     <!-- 카드가 슬라이드 형태로 표시됩니다 -->
   </div>
 
+  <!-- 모달 -->
+  <div id="modal">
+    <div id="modal-content">
+      <button class="close-btn" onclick="closeModal()">닫기</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
   <script>
     const maxChars = 1000;
-    const apiUrl = 'https://kamarie.vercel.app/api/letters'; // Vercel에 배포된 API URL
+    const apiUrl = 'https://kamarie.vercel.app/api/letters';
 
     // 글자 수 업데이트
     document.getElementById("letter-input").addEventListener("input", function () {
       const charCount = this.value.length;
-      document.getElementById("char-count").textContent = ${charCount} / ${maxChars}자;
+      document.getElementById("char-count").textContent = `${charCount} / ${maxChars}자`;
     });
 
     // 편지 보내기 함수
@@ -75,7 +123,7 @@
         alert("내용을 입력하세요.");
         return;
       } else if (letterText.length > maxChars) {
-        alert(편지는 ${maxChars}자 이내로 작성해주세요.);
+        alert(`편지는 ${maxChars}자 이내로 작성해주세요.`);
         return;
       }
 
@@ -103,7 +151,7 @@
         // 입력창 초기화
         letterInput.value = '';
         categorySelect.value = '';
-        document.getElementById("char-count").textContent = 0 / ${maxChars}자;
+        document.getElementById("char-count").textContent = `0 / ${maxChars}자`;
       } catch (error) {
         console.error(error);
         alert('편지 전송 중 오류가 발생했습니다.');
@@ -137,12 +185,31 @@
       const letterList = document.getElementById('letter-list');
       const newLetter = document.createElement('div');
       newLetter.className = 'letter-item';
-      newLetter.innerHTML = 
+      newLetter.innerHTML = `
         <strong>카테고리: ${letter.category}</strong>
         <div>${letter.text}</div>
         <div class="timestamp">${letter.timestamp}</div>
-      ;
+      `;
+      newLetter.onclick = () => openModal(letter);
       letterList.appendChild(newLetter);
+    }
+
+    // 모달 열기
+    function openModal(letter) {
+      const modal = document.getElementById('modal');
+      const modalBody = document.getElementById('modal-body');
+      modalBody.innerHTML = `
+        <strong>카테고리: ${letter.category}</strong>
+        <div>${letter.text}</div>
+        <div class="timestamp">${letter.timestamp}</div>
+      `;
+      modal.style.display = 'flex';
+    }
+
+    // 모달 닫기
+    function closeModal() {
+      const modal = document.getElementById('modal');
+      modal.style.display = 'none';
     }
 
     // 슬라이드 애니메이션 시작
