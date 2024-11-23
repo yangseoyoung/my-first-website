@@ -46,6 +46,16 @@
     }
     .timestamp { font-size: 0.8em; color: #666; margin-top: 5px; }
     .category-label { font-size: 1.1em; margin-bottom: 10px; }
+    #cat-image {
+      margin: 20px auto;
+      width: 500px;
+      height: 300px;
+      background-image: url('https://placekitten.com/500/300');
+      background-size: cover;
+      background-position: center;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -54,6 +64,7 @@
   <!-- 카테고리 선택 -->
   <div>
     <p class="category-label">올해를 연상할 수 있는 단어를 선택해 주세요.</p>
+    <div id="cat-image"></div>
     <select id="category-select">
       <option value="">카테고리를 선택하세요</option>
       <option value="가">가</option>
