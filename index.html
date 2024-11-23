@@ -10,7 +10,7 @@
     .tab { padding: 10px 20px; cursor: pointer; border: 1px solid #ddd; background-color: #f1f1f1; margin-right: 5px; border-radius: 10px; }
     .tab.active { background-color: #ddd; }
     #letter-list { display: flex; overflow: hidden; justify-content: start; align-items: center; height: 200px; }
-    #letter-list div { min-width: 300px; margin: 0 10px; flex-shrink: 0; }
+    #letter-list div { min-width: 300px; margin: 0 10px; flex-shrink: 0; cursor: pointer; }
     button { padding: 10px 20px; font-size: 1em; cursor: pointer; margin: 5px; }
     textarea { width: 80%; height: 100px; font-size: 1em; margin: 10px 0; }
     select { font-size: 1em; padding: 5px; margin: 10px; }
@@ -22,14 +22,10 @@
       max-width: 300px; 
       text-align: left; 
       font-size: 1.2em; 
-      border-radius: 10px; /* 둥근 테두리 적용 */
+      border-radius: 10px; /* 둥근 테두리 */
     }
     .timestamp { font-size: 0.8em; color: #666; margin-top: 5px; }
     .category-label { font-size: 1.1em; margin-bottom: 10px; }
-    @keyframes slide {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-100%); }
-    }
   </style>
 </head>
 <body>
@@ -66,6 +62,7 @@
     <!-- 카드가 슬라이드 형태로 표시됩니다 -->
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     const maxChars = 1000;
     const apiUrl = 'https://kamarie.vercel.app/api/letters'; // Vercel에 배포된 API URL
@@ -190,29 +187,21 @@
         <div>${letter.text}</div>
         <div class="timestamp">${letter.timestamp}</div>
       `;
+      newLetter.onclick = () => openPopup(letter); // 팝업 이벤트 추가
       letterList.appendChild(newLetter);
     }
 
-    // 슬라이드 애니메이션 시작
-    function startSliding() {
-      const letterList = document.getElementById('letter-list');
-      let scrollAmount = 0;
-      const slide = () => {
-        if (scrollAmount >= letterList.scrollWidth - letterList.clientWidth) {
-          scrollAmount = 0;
-          letterList.scrollLeft = 0; // 맨 처음으로 이동
-        } else {
-          scrollAmount += 1;
-          letterList.scrollLeft += 1; // 오른쪽으로 스크롤
-        }
-        requestAnimationFrame(slide); // 루프
-      };
-      slide();
-    }
-
-    // 페이지 로드 시 초기 설정
-    setupTabs();
-    loadLetters();
-  </script>
-</body>
-</html>
+    // 팝업 열기 및 이미지 저장
+    function openPopup(letter) {
+      const popup = window.open('', '_blank', 'width=500,height=800');
+      popup.document.write(`
+        <html lang="ko">
+          <head>
+            <title>편지 저장</title>
+          </head>
+          <body style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+            <div style="border: 1px solid #ddd; padding: 20px; border-radius: 10px; display: inline-block; max-width: 300px;">
+              <strong>카테고리: ${letter.category}</strong>
+              <div>${letter.text}</div>
+              <div class="timestamp">${letter.timestamp}</div>
+            </div>
