@@ -1,63 +1,169 @@
-<button id="submit-button" onclick="submitLetter()">편지 보내기</button>
-
-<script>
-  async function submitLetter() {
-    const submitButton = document.getElementById("submit-button");
-    const letterInput = document.getElementById("letter-input");
-    const categorySelect = document.getElementById("category-select");
-    const letterText = letterInput.value.trim();
-    const category = categorySelect.value;
-
-    // 입력값 검증
-    if (!category) {
-      alert("카테고리를 선택하세요.");
-      return;
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>우리집 댕댕이에게 보내는 편지</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    #letter-list { display: flex; overflow: hidden; justify-content: start; align-items: center; height: 200px; }
+    #letter-list div { min-width: 300px; margin: 0 10px; flex-shrink: 0; }
+    button { padding: 10px 20px; font-size: 1em; cursor: pointer; margin: 5px; }
+    textarea { width: 80%; height: 100px; font-size: 1em; margin: 10px 0; }
+    select { font-size: 1em; padding: 5px; margin: 10px; }
+    .letter-item { border: 1px solid #ddd; background-color: #fff; padding: 20px; margin: 10px auto; max-width: 300px; text-align: left; font-size: 1.2em; }
+    .timestamp { font-size: 0.8em; color: #666; margin-top: 5px; }
+    .category-label { font-size: 1.1em; margin-bottom: 10px; }
+    @keyframes slide {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
     }
+  </style>
+</head>
+<body>
+  <h1>우리집 댕댕이에게 보내는 편지</h1>
 
-    if (letterText.length === 0) {
-      alert("내용을 입력하세요.");
-      return;
-    } else if (letterText.length > maxChars) {
-      alert(`편지는 ${maxChars}자 이내로 작성해주세요.`);
-      return;
-    }
+  <!-- 카테고리 선택 -->
+  <div>
+    <p class="category-label">올해를 연상할 수 있는 단어를 선택해 주세요.</p>
+    <select id="category-select">
+      <option value="">카테고리를 선택하세요</option>
+      <option value="가">가</option>
+      <option value="나">나</option>
+      <option value="다">다</option>
+      <option value="라">라</option>
+      <option value="마">마</option>
+      <option value="바">바</option>
+      <option value="사">사</option>
+      <option value="아">아</option>
+    </select>
+  </div>
 
-    const letter = {
-      text: letterText,
-      category,
-      timestamp: new Date().toLocaleString(),
-    };
+  <!-- 편지 작성 -->
+  <textarea id="letter-input" placeholder="여기에 편지를 작성하세요. (최대 1000자)"></textarea>
+  <p><small id="char-count">0 / 1000자</small></p>
+  <button onclick="submitLetter()">편지 보내기</button>
 
-    try {
-      // 버튼 비활성화 및 로딩 상태 표시
-      submitButton.disabled = true;
-      submitButton.textContent = "보내는 중...";
+  <h2>모든 편지</h2>
+  <div id="letter-list">
+    <!-- 카드가 슬라이드 형태로 표시됩니다 -->
+  </div>
 
-      // 백엔드 서버에 편지 저장
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(letter),
-      });
+  <script>
+    const maxChars = 1000;
+    const apiUrl = 'https://kamarie.vercel.app/api/letters'; // Vercel에 배포된 API URL
 
-      if (!response.ok) {
-        throw new Error("서버에 편지 저장 실패");
+    // 글자 수 업데이트
+    document.getElementById("letter-input").addEventListener("input", function () {
+      const charCount = this.value.length;
+      document.getElementById("char-count").textContent = ${charCount} / ${maxChars}자;
+    });
+
+    // 편지 보내기 함수
+    async function submitLetter() {
+      const letterInput = document.getElementById('letter-input');
+      const categorySelect = document.getElementById('category-select');
+      const letterText = letterInput.value.trim();
+      const category = categorySelect.value;
+
+      if (!category) {
+        alert("카테고리를 선택하세요.");
+        return;
       }
 
-      const savedLetter = await response.json();
-      addLetterToList(savedLetter);
+      if (letterText.length === 0) {
+        alert("내용을 입력하세요.");
+        return;
+      } else if (letterText.length > maxChars) {
+        alert(편지는 ${maxChars}자 이내로 작성해주세요.);
+        return;
+      }
 
-      // 입력창 초기화
-      letterInput.value = "";
-      categorySelect.value = "";
-      document.getElementById("char-count").textContent = `0 / ${maxChars}자`;
-    } catch (error) {
-      console.error(error);
-      alert("편지 전송 중 오류가 발생했습니다.");
-    } finally {
-      // 버튼 활성화 및 로딩 상태 해제
-      submitButton.disabled = false;
-      submitButton.textContent = "편지 보내기";
+      const letter = {
+        text: letterText,
+        category,
+        timestamp: new Date().toLocaleString(),
+      };
+
+      // 백엔드 서버에 편지 저장
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(letter),
+        });
+
+        if (!response.ok) {
+          throw new Error('서버에 편지 저장 실패');
+        }
+
+        const savedLetter = await response.json();
+        addLetterToList(savedLetter);
+
+        // 입력창 초기화
+        letterInput.value = '';
+        categorySelect.value = '';
+        document.getElementById("char-count").textContent = 0 / ${maxChars}자;
+      } catch (error) {
+        console.error(error);
+        alert('편지 전송 중 오류가 발생했습니다.');
+      }
     }
-  }
-</script>
+
+    // 서버에서 편지 목록 불러오기
+    async function loadLetters() {
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error('서버에서 편지 불러오기 실패');
+        }
+
+        const letters = await response.json();
+        const letterList = document.getElementById('letter-list');
+        letterList.innerHTML = ''; // 기존 내용 초기화
+
+        letters.forEach(addLetterToList);
+
+        // 슬라이드 애니메이션 적용
+        startSliding();
+      } catch (error) {
+        console.error(error);
+        alert('편지 불러오는 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 편지를 리스트에 추가
+    function addLetterToList(letter) {
+      const letterList = document.getElementById('letter-list');
+      const newLetter = document.createElement('div');
+      newLetter.className = 'letter-item';
+      newLetter.innerHTML = 
+        <strong>카테고리: ${letter.category}</strong>
+        <div>${letter.text}</div>
+        <div class="timestamp">${letter.timestamp}</div>
+      ;
+      letterList.appendChild(newLetter);
+    }
+
+    // 슬라이드 애니메이션 시작
+    function startSliding() {
+      const letterList = document.getElementById('letter-list');
+      let scrollAmount = 0;
+      const slide = () => {
+        if (scrollAmount >= letterList.scrollWidth - letterList.clientWidth) {
+          scrollAmount = 0;
+          letterList.scrollLeft = 0; // 맨 처음으로 이동
+        } else {
+          scrollAmount += 1;
+          letterList.scrollLeft += 1; // 오른쪽으로 스크롤
+        }
+        requestAnimationFrame(slide); // 루프
+      };
+      slide();
+    }
+
+    // 페이지 로드 시 서버에서 편지 불러오기
+    loadLetters();
+  </script>
+</body>
+</html>
