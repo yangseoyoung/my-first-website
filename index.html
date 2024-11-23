@@ -3,21 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>편지 작성하기</title>
+  <title>우리집 댕댕이에게 보내는 편지</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-    #letter-list { font-size: 1.2em; margin: 20px 0; padding: 20px; border: 1px solid #ddd; background-color: #f9f9f9; }
+    #letter-list { display: flex; overflow: hidden; justify-content: start; align-items: center; height: 200px; }
+    #letter-list div { min-width: 300px; margin: 0 10px; flex-shrink: 0; }
     button { padding: 10px 20px; font-size: 1em; cursor: pointer; margin: 5px; }
     textarea { width: 80%; height: 100px; font-size: 1em; margin: 10px 0; }
     select { font-size: 1em; padding: 5px; margin: 10px; }
-    .letter-item { margin-bottom: 10px; padding: 10px; border-bottom: 1px solid #ccc; text-align: left; }
+    .letter-item { border: 1px solid #ddd; background-color: #fff; padding: 20px; margin: 10px auto; max-width: 300px; text-align: left; font-size: 1.2em; }
     .timestamp { font-size: 0.8em; color: #666; margin-top: 5px; }
-    .card { border: 1px solid #ddd; background-color: #fff; padding: 20px; margin: 10px auto; max-width: 400px; text-align: left; font-size: 1.2em; }
     .category-label { font-size: 1.1em; margin-bottom: 10px; }
+    @keyframes slide {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
   </style>
 </head>
 <body>
-  <h1>편지 작성하기</h1>
+  <h1>우리집 댕댕이에게 보내는 편지</h1>
 
   <!-- 카테고리 선택 -->
   <div>
@@ -40,10 +44,11 @@
   <p><small id="char-count">0 / 1000자</small></p>
   <button onclick="submitLetter()">편지 보내기</button>
 
-  <h2>보낸 편지들</h2>
-  <div id="letter-list">아래에 보낸 편지가 표시됩니다.</div>
+  <h2>모든 편지</h2>
+  <div id="letter-list">
+    <!-- 카드가 슬라이드 형태로 표시됩니다 -->
+  </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     const maxChars = 1000;
     const apiUrl = 'https://kamarie.vercel.app/api/letters'; // Vercel에 배포된 API URL
@@ -118,6 +123,9 @@
         letterList.innerHTML = ''; // 기존 내용 초기화
 
         letters.forEach(addLetterToList);
+
+        // 슬라이드 애니메이션 적용
+        startSliding();
       } catch (error) {
         console.error(error);
         alert('편지 불러오는 중 오류가 발생했습니다.');
@@ -130,25 +138,28 @@
       const newLetter = document.createElement('div');
       newLetter.className = 'letter-item';
       newLetter.innerHTML = `
-        <div class="card" id="letter-${letter.timestamp.replace(/[:\s]/g, '')}">
-          <strong>카테고리: ${letter.category}</strong>
-          <div>${letter.text}</div>
-          <div class="timestamp">${letter.timestamp}</div>
-          <button onclick="saveAsImage('letter-${letter.timestamp.replace(/[:\s]/g, '')}')">이미지로 저장</button>
-        </div>
+        <strong>카테고리: ${letter.category}</strong>
+        <div>${letter.text}</div>
+        <div class="timestamp">${letter.timestamp}</div>
       `;
       letterList.appendChild(newLetter);
     }
 
-    // 편지 카드를 이미지로 저장
-    function saveAsImage(cardId) {
-      const card = document.getElementById(cardId);
-      html2canvas(card).then((canvas) => {
-        const link = document.createElement('a');
-        link.download = `${cardId}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-      });
+    // 슬라이드 애니메이션 시작
+    function startSliding() {
+      const letterList = document.getElementById('letter-list');
+      let scrollAmount = 0;
+      const slide = () => {
+        if (scrollAmount >= letterList.scrollWidth - letterList.clientWidth) {
+          scrollAmount = 0;
+          letterList.scrollLeft = 0; // 맨 처음으로 이동
+        } else {
+          scrollAmount += 1;
+          letterList.scrollLeft += 1; // 오른쪽으로 스크롤
+        }
+        requestAnimationFrame(slide); // 루프
+      };
+      slide();
     }
 
     // 페이지 로드 시 서버에서 편지 불러오기
