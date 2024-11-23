@@ -13,24 +13,29 @@
     .letter-item { margin-bottom: 10px; padding: 10px; border-bottom: 1px solid #ccc; text-align: left; }
     .timestamp { font-size: 0.8em; color: #666; margin-top: 5px; }
     .card { border: 1px solid #ddd; background-color: #fff; padding: 20px; margin: 10px auto; max-width: 400px; text-align: left; font-size: 1.2em; }
+    .category-label { font-size: 1.1em; margin-bottom: 10px; }
   </style>
 </head>
 <body>
   <h1>편지 작성하기</h1>
-  
-  <!-- 카테고리 선택 -->
-  <select id="category-select">
-    <option value="">카테고리를 선택하세요</option>
-    <option value="가">가</option>
-    <option value="나">나</option>
-    <option value="다">다</option>
-    <option value="라">라</option>
-    <option value="마">마</option>
-    <option value="바">바</option>
-    <option value="사">사</option>
-    <option value="아">아</option>
-  </select>
 
+  <!-- 카테고리 선택 -->
+  <div>
+    <p class="category-label">올해를 연상할 수 있는 단어를 선택해 주세요.</p>
+    <select id="category-select">
+      <option value="">카테고리를 선택하세요</option>
+      <option value="가">가</option>
+      <option value="나">나</option>
+      <option value="다">다</option>
+      <option value="라">라</option>
+      <option value="마">마</option>
+      <option value="바">바</option>
+      <option value="사">사</option>
+      <option value="아">아</option>
+    </select>
+  </div>
+
+  <!-- 편지 작성 -->
   <textarea id="letter-input" placeholder="여기에 편지를 작성하세요. (최대 1000자)"></textarea>
   <p><small id="char-count">0 / 1000자</small></p>
   <button onclick="submitLetter()">편지 보내기</button>
