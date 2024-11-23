@@ -6,23 +6,12 @@
   <title>편지 작성하기</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-    #letter-list { display: flex; overflow: hidden; justify-content: start; align-items: center; height: 200px; }
-    #letter-list div { min-width: 300px; margin: 0 10px; flex-shrink: 0; cursor: pointer; }
+    #letter-list { display: flex; overflow-x: auto; justify-content: start; align-items: center; gap: 20px; }
+    #letter-list div { min-width: 300px; height: 300px; flex-shrink: 0; cursor: pointer; display: flex; justify-content: center; align-items: center; background: #f9f9f9; border: 1px solid #ddd; border-radius: 10px; }
     button { padding: 10px 20px; font-size: 1em; cursor: pointer; margin: 5px; }
     textarea { width: 80%; height: 100px; font-size: 1em; margin: 10px 0; }
     select { font-size: 1em; padding: 5px; margin: 10px; }
-    .letter-item { 
-      border: 1px solid #ddd; 
-      background-color: #fff; 
-      padding: 20px; 
-      margin: 10px auto; 
-      max-width: 300px; 
-      text-align: left; 
-      font-size: 1.2em; 
-      border-radius: 10px;
-    }
-    .timestamp { font-size: 0.8em; color: #666; margin-top: 5px; }
-    .category-label { font-size: 1.1em; margin-bottom: 10px; }
+    .letter-item-category { font-size: 1.5em; font-weight: bold; color: #333; }
     #modal { 
       position: fixed; 
       top: 0; 
@@ -36,12 +25,13 @@
     }
     #modal-content {
       background-color: #fff;
+      width: 500px;
+      height: 1000px;
       padding: 20px;
       border-radius: 10px;
       text-align: left;
-      max-width: 400px;
-      width: 90%;
       position: relative;
+      overflow-y: auto;
     }
     #modal-content .close-btn {
       position: absolute;
@@ -54,10 +44,8 @@
       padding: 5px 10px;
       cursor: pointer;
     }
-    @keyframes slide {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-100%); }
-    }
+    .timestamp { font-size: 0.8em; color: #666; margin-top: 5px; }
+    .category-label { font-size: 1.1em; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -85,9 +73,7 @@
   <button onclick="submitLetter()">편지 보내기</button>
 
   <h2>모든 편지</h2>
-  <div id="letter-list">
-    <!-- 카드가 슬라이드 형태로 표시됩니다 -->
-  </div>
+  <div id="letter-list"></div>
 
   <!-- 모달 -->
   <div id="modal">
@@ -133,7 +119,6 @@
         timestamp: new Date().toLocaleString(),
       };
 
-      // 백엔드 서버에 편지 저장
       try {
         const response = await fetch(apiUrl, {
           method: 'POST',
@@ -171,9 +156,6 @@
         letterList.innerHTML = ''; // 기존 내용 초기화
 
         letters.forEach(addLetterToList);
-
-        // 슬라이드 애니메이션 적용
-        startSliding();
       } catch (error) {
         console.error(error);
         alert('편지 불러오는 중 오류가 발생했습니다.');
@@ -186,9 +168,7 @@
       const newLetter = document.createElement('div');
       newLetter.className = 'letter-item';
       newLetter.innerHTML = `
-        <strong>카테고리: ${letter.category}</strong>
-        <div>${letter.text}</div>
-        <div class="timestamp">${letter.timestamp}</div>
+        <div class="letter-item-category">${letter.category}</div>
       `;
       newLetter.onclick = () => openModal(letter);
       letterList.appendChild(newLetter);
@@ -210,23 +190,6 @@
     function closeModal() {
       const modal = document.getElementById('modal');
       modal.style.display = 'none';
-    }
-
-    // 슬라이드 애니메이션 시작
-    function startSliding() {
-      const letterList = document.getElementById('letter-list');
-      let scrollAmount = 0;
-      const slide = () => {
-        if (scrollAmount >= letterList.scrollWidth - letterList.clientWidth) {
-          scrollAmount = 0;
-          letterList.scrollLeft = 0; // 맨 처음으로 이동
-        } else {
-          scrollAmount += 1;
-          letterList.scrollLeft += 1; // 오른쪽으로 스크롤
-        }
-        requestAnimationFrame(slide); // 루프
-      };
-      slide();
     }
 
     // 페이지 로드 시 서버에서 편지 불러오기
